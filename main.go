@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 )
 
@@ -43,8 +42,8 @@ func NewHostName(domain string, ip string, enabled bool) *Hostname {
 	return &Hostname{domain, ip, enabled}
 }
 
-func (h *Hostname) toString() []byte {
-	return []byte(h.Domain + " " + h.IP)
+func (h *Hostname) toString() string {
+	return h.Domain + " " + h.IP
 }
 
 /*
@@ -101,6 +100,23 @@ func getArgs() []string {
 	return os.Args[2:]
 }
 
+func appendToFile(filePath string, stringToWrite string) {
+	fp, err := os.OpenFile(filePath, os.O_WRONLY|os.O_APPEND, 0644)
+	if err != nil {
+		fmt.Println("failed opening file %s : %s:", filePath, err)
+		os.Exit(1)
+	}
+	defer fp.Close()
+
+	stringToWrite = "\n" + stringToWrite
+	_, err = fp.WriteString(stringToWrite)
+	if err != nil {
+		fmt.Println("failed append string: %s:", filePath, err)
+		os.Exit(1)
+
+	}
+}
+
 func appendHost(domain string, ip string) {
 	if domain == "" || ip == "" {
 		return
@@ -108,10 +124,7 @@ func appendHost(domain string, ip string) {
 
 	fmt.Println("append" + " " + ip)
 	hostname := NewHostName(domain, ip, true)
-	err := ioutil.WriteFile(getHostPath(), hostname.toString(), 0644)
-	if err != nil {
-		fmt.Println(err)
-	}
+	appendToFile(getHostPath(), hostname.toString())
 }
 
 func main() {
