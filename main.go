@@ -2,7 +2,10 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
+	"strconv"
+	"strings"
 )
 
 /*
@@ -117,6 +120,46 @@ func appendToFile(filePath string, stringToWrite string) {
 	}
 }
 
+func PathExists(path string) bool {
+	_, err := os.Stat(path)
+	if err == nil || os.IsNotExist(err) {
+		return true
+	}
+
+	return false
+}
+
+func byteArrToStr(b []byte) string {
+	s := make([]string, len(b))
+	for i := range b {
+		s[i] = strconv.Itoa(int(b[i]))
+	}
+	return strings.Join(s, ",")
+}
+
+func parseHostFile(path string) {
+	if !PathExists(path) {
+		fmt.Println("path %s is not exists", path)
+		os.Exit(1)
+	}
+
+	fileContents, err := ioutil.ReadFile(path)
+	if err != nil {
+		fmt.Println("read file %s fail: %s", path, err)
+		os.Exit(1)
+	}
+
+	hostnameArr := strings.Split(byteArrToStr(fileContents), "\n")
+	hostnameMap := make(map[string]string)
+	for _, val := range hostnameArr {
+		if len(val) == 0 || val == "\r\n" {
+			continue
+		}
+		tmpHostname := strings.Split(val, "\n")
+		hostnameMap[tmpHostname[0]] = tmpHostname[1]
+	}
+}
+
 func appendHost(domain string, ip string) {
 	if domain == "" || ip == "" {
 		return
@@ -125,6 +168,20 @@ func appendHost(domain string, ip string) {
 	fmt.Println("append" + " " + ip)
 	hostname := NewHostName(domain, ip, true)
 	appendToFile(getHostPath(), hostname.toString())
+}
+
+func deleteDomain(domain string) {
+	if domain == "" {
+		return
+	}
+
+	parseHostFile(getHostPath())
+	/*if len(currHostsMap) == "" {*/
+	//return
+	//}
+
+	//delete(currHostsMap, domain)
+	/*writeToFile(currHostsMap, getHostPath())*/
 }
 
 func main() {
@@ -140,6 +197,10 @@ func main() {
 		domain := args[0]
 		ip := args[1]
 		appendHost(domain, ip)
+		break
+	case "del":
+		domain := args[0]
+		deleteDomain(domain)
 		break
 	default:
 		fmt.Println("Please enter the right command[append]")
