@@ -9,6 +9,11 @@ switch hosts in go
         eg:
         sudo ./main append www.baidu.com 127.0.0.1
 
-根据域名删除host记录 TODO
+根据域名删除host记录
+
+	sudo ./main del [host]
+
+	eg:
+	sudo ./main del localhost
 
 查看当前系统host列表 TODO
