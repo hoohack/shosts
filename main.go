@@ -163,6 +163,23 @@ func appendHost(domain string, ip string) {
 	appendToFile(getHostPath(), hostname.toString())
 }
 
+func writeToFile(hostnameMap map[string]string, path string) {
+	if !PathExists(path) {
+		fmt.Println("path %s is not exists", path)
+		os.Exit(1)
+	}
+
+	fp, _ := os.OpenFile(path, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
+	defer fp.Close()
+
+	tmpStr := ""
+	for mapKey, mapVal := range hostnameMap {
+		tmpStr = mapVal + "\t" + mapKey
+		fmt.Println(tmpStr)
+		fp.WriteString(tmpStr)
+	}
+}
+
 func deleteDomain(domain string) {
 	if domain == "" {
 		return
@@ -175,8 +192,7 @@ func deleteDomain(domain string) {
 	}
 
 	delete(currHostsMap, domain)
-	fmt.Println(currHostsMap)
-	/*writeToFile(currHostsMap, getHostPath())*/
+	writeToFile(currHostsMap, getHostPath())
 }
 
 func main() {
