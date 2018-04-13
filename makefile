@@ -1,4 +1,4 @@
 hosts:
 	go build main.go
-clear:
+clean:
 	rm -rf main

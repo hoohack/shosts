@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"strconv"
 	"strings"
 )
 
@@ -129,15 +128,7 @@ func PathExists(path string) bool {
 	return false
 }
 
-func byteArrToStr(b []byte) string {
-	s := make([]string, len(b))
-	for i := range b {
-		s[i] = strconv.Itoa(int(b[i]))
-	}
-	return strings.Join(s, ",")
-}
-
-func parseHostFile(path string) {
+func parseHostFile(path string) map[string]string {
 	if !PathExists(path) {
 		fmt.Println("path %s is not exists", path)
 		os.Exit(1)
@@ -149,15 +140,17 @@ func parseHostFile(path string) {
 		os.Exit(1)
 	}
 
-	hostnameArr := strings.Split(byteArrToStr(fileContents), "\n")
+	hostnameArr := strings.Split(string(fileContents[:]), "\n")
 	hostnameMap := make(map[string]string)
 	for _, val := range hostnameArr {
 		if len(val) == 0 || val == "\r\n" {
 			continue
 		}
-		tmpHostname := strings.Split(val, "\n")
-		hostnameMap[tmpHostname[0]] = tmpHostname[1]
+		tmpHostname := strings.Split(val, "\t")
+		hostnameMap[tmpHostname[1]] = tmpHostname[0]
 	}
+
+	return hostnameMap
 }
 
 func appendHost(domain string, ip string) {
@@ -175,12 +168,14 @@ func deleteDomain(domain string) {
 		return
 	}
 
-	parseHostFile(getHostPath())
-	/*if len(currHostsMap) == "" {*/
-	//return
-	//}
+	currHostsMap := parseHostFile(getHostPath())
 
-	//delete(currHostsMap, domain)
+	if len(currHostsMap) == 0 {
+		return
+	}
+
+	delete(currHostsMap, domain)
+	fmt.Println(currHostsMap)
 	/*writeToFile(currHostsMap, getHostPath())*/
 }
 
