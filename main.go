@@ -12,7 +12,7 @@ import (
  */
 type Hostfile struct {
 	Path  string
-	Hosts map[string]Hostname
+	Hosts map[string]*Hostname
 }
 
 /*
@@ -37,23 +37,23 @@ type HostGroup struct {
 * 实例化
  */
 func NewHostfile(path string) *Hostfile {
-	return &Hostfile{path, make(map[string]Hostname)}
+	return &Hostfile{path, make(map[string]*Hostname)}
 }
 
-func NewHostName(domain string, ip string, enabled bool) *Hostname {
+func NewHostname(domain string, ip string, enabled bool) *Hostname {
 	return &Hostname{domain, ip, enabled}
 }
 
 func (h *Hostname) toString() string {
-	return h.Domain + " " + h.IP
+	return h.IP + " " + h.Domain
 }
 
 /*
 * 增加一个host记录
  */
-func (h *Hostfile) Add(host Hostname) {
+func (h *Hostfile) Add(host *Hostname) {
 	if h.Hosts == nil {
-		h.Hosts = make(map[string]Hostname)
+		h.Hosts = make(map[string]*Hostname)
 	}
 	h.Hosts[host.Domain] = host
 }
@@ -128,7 +128,7 @@ func PathExists(path string) bool {
 	return false
 }
 
-func parseHostFile(path string) map[string]string {
+func parseHostFile(path string) map[string]*Hostname {
 	if !PathExists(path) {
 		fmt.Println("path %s is not exists", path)
 		os.Exit(1)
@@ -141,15 +141,17 @@ func parseHostFile(path string) map[string]string {
 	}
 
 	hostnameArr := strings.Split(string(fileContents[:]), "\n")
-	hostnameMap := make(map[string]string)
+	hostnameMap := make(map[string]*Hostname)
 	for _, val := range hostnameArr {
 		if len(val) == 0 || val == "\r\n" {
 			continue
 		}
-		tmpHostname := strings.Split(val, "\t")
-		hostnameMap[tmpHostname[1]] = tmpHostname[0]
+		tmpHostnameArr := strings.Split(val, " ")
+		tmpHostname := NewHostname(tmpHostnameArr[1], tmpHostnameArr[0], true)
+		hostnameMap[tmpHostname.Domain] = tmpHostname
 	}
 
+	fmt.Println(hostnameMap)
 	return hostnameMap
 }
 
@@ -159,11 +161,11 @@ func appendHost(domain string, ip string) {
 	}
 
 	fmt.Println("append" + " " + ip)
-	hostname := NewHostName(domain, ip, true)
+	hostname := NewHostname(domain, ip, true)
 	appendToFile(getHostPath(), hostname.toString())
 }
 
-func writeToFile(hostnameMap map[string]string, path string) {
+func writeToFile(hostnameMap map[string]*Hostname, path string) {
 	if !PathExists(path) {
 		fmt.Println("path %s is not exists", path)
 		os.Exit(1)
@@ -172,11 +174,8 @@ func writeToFile(hostnameMap map[string]string, path string) {
 	fp, _ := os.OpenFile(path, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	defer fp.Close()
 
-	tmpStr := ""
-	for mapKey, mapVal := range hostnameMap {
-		tmpStr = mapVal + "\t" + mapKey
-		fmt.Println(tmpStr)
-		fp.WriteString(tmpStr)
+	for _, mapVal := range hostnameMap {
+		fp.WriteString(mapVal.toString())
 	}
 }
 
@@ -187,7 +186,7 @@ func deleteDomain(domain string) {
 
 	currHostsMap := parseHostFile(getHostPath())
 
-	if len(currHostsMap) == 0 {
+	if len(currHostsMap) == 0 || currHostsMap[domain] == nil {
 		return
 	}
 
