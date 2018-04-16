@@ -151,7 +151,6 @@ func parseHostFile(path string) map[string]*Hostname {
 		hostnameMap[tmpHostname.Domain] = tmpHostname
 	}
 
-	fmt.Println(hostnameMap)
 	return hostnameMap
 }
 
@@ -160,7 +159,6 @@ func appendHost(domain string, ip string) {
 		return
 	}
 
-	fmt.Println("append" + " " + ip)
 	hostname := NewHostname(domain, ip, true)
 	appendToFile(getHostPath(), hostname.toString())
 }
@@ -203,7 +201,14 @@ func deleteDomain(domain string) {
 }
 
 func listCurrentHosts() {
+	currHostsMap := parseHostFile(getHostPath())
+	if len(currHostsMap) == 0 {
+		return
+	}
 
+	for _, mapVal := range currHostsMap {
+		fmt.Println(mapVal.toString())
+	}
 }
 
 func main() {
