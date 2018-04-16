@@ -16,4 +16,9 @@ switch hosts in go
 	eg:
 	sudo ./main del localhost
 
-查看当前系统host列表 TODO
+查看当前系统host列表
+	
+	./main list
+
+	eg:
+	./main list
