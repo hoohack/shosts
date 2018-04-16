@@ -171,11 +171,19 @@ func writeToFile(hostnameMap map[string]*Hostname, path string) {
 		os.Exit(1)
 	}
 
-	fp, _ := os.OpenFile(path, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
+	fp, err := os.OpenFile(path, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 	defer fp.Close()
 
 	for _, mapVal := range hostnameMap {
-		fp.WriteString(mapVal.toString())
+		_, writeErr := fp.WriteString(mapVal.toString())
+		if writeErr != nil {
+			fmt.Println(writeErr)
+			os.Exit(1)
+		}
 	}
 }
 
@@ -192,6 +200,10 @@ func deleteDomain(domain string) {
 
 	delete(currHostsMap, domain)
 	writeToFile(currHostsMap, getHostPath())
+}
+
+func listCurrentHosts() {
+
 }
 
 func main() {
@@ -212,7 +224,10 @@ func main() {
 		domain := args[0]
 		deleteDomain(domain)
 		break
+	case "list":
+		listCurrentHosts()
+		break
 	default:
-		fmt.Println("Please enter the right command[append]")
+		fmt.Println("Please enter the right command[append|del|list]")
 	}
 }
