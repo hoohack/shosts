@@ -7,7 +7,11 @@ import (
 )
 
 func getCommand() string {
-	return os.Args[1]
+	if len(os.Args) > 1 {
+		return os.Args[1]
+	} else {
+		return ""
+	}
 }
 
 func getArgs() []string {
@@ -17,6 +21,7 @@ func getArgs() []string {
 func main() {
 	command := getCommand()
 	if command == "" {
+		fmt.Println("Please enter the right command[append|del|list]")
 		os.Exit(1)
 	}
 

@@ -4,10 +4,10 @@ switch hosts in go
 ## 功能
 追加单条hosts记录
 
-        sudo ./main append [host] [ip]
+        sudo ./main append [ip] [domain]
 
         eg:
-        sudo ./main append www.baidu.com 127.0.0.1
+        sudo ./main append 127.0.0.1 www.baidu.com
 
 根据域名删除host记录
 
