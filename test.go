@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/hoohack/go-hosts/hosts_test"
+	"github.com/hoohack/go-hosts/tests"
 )
 
 func main() {
-	hosts_test.TestAppend()
+	tests.TestAppend()
 }

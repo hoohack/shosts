@@ -121,13 +121,13 @@ func PathExists(path string) bool {
 
 func ParseHostFile(path string) map[string]*Hostname {
 	if !PathExists(path) {
-		fmt.Println("path %s is not exists", path)
+		fmt.Printf("path %s is not exists", path)
 		os.Exit(1)
 	}
 
 	fileContents, err := ioutil.ReadFile(path)
 	if err != nil {
-		fmt.Println("read file %s fail: %s", path, err)
+		fmt.Printf("read file %s fail: %s", path, err)
 		os.Exit(1)
 	}
 
