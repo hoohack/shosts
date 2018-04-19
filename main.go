@@ -43,4 +43,6 @@ func main() {
 	default:
 		fmt.Println("Please enter the right command[append|del|list]")
 	}
+
+	TestAppend()
 }

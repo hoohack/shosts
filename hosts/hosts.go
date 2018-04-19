@@ -97,7 +97,7 @@ func disableGroup(name string) {
 func appendToFile(filePath string, stringToWrite string) {
 	fp, err := os.OpenFile(filePath, os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
-		fmt.Println("failed opening file %s : %s:", filePath, err)
+		fmt.Printf("failed opening file %s : %s\n", filePath, err)
 		os.Exit(1)
 	}
 	defer fp.Close()
@@ -105,9 +105,8 @@ func appendToFile(filePath string, stringToWrite string) {
 	stringToWrite = "\n" + stringToWrite
 	_, err = fp.WriteString(stringToWrite)
 	if err != nil {
-		fmt.Println("failed append string: %s:", filePath, err)
+		fmt.Printf("failed append string: %s: %s\n", filePath, err)
 		os.Exit(1)
-
 	}
 }
 
@@ -120,7 +119,7 @@ func PathExists(path string) bool {
 	return false
 }
 
-func parseHostFile(path string) map[string]*Hostname {
+func ParseHostFile(path string) map[string]*Hostname {
 	if !PathExists(path) {
 		fmt.Println("path %s is not exists", path)
 		os.Exit(1)
@@ -157,7 +156,7 @@ func AppendHost(domain string, ip string) {
 
 func writeToFile(hostnameMap map[string]*Hostname, path string) {
 	if !PathExists(path) {
-		fmt.Println("path %s is not exists", path)
+		fmt.Printf("path %s is not exists", path)
 		os.Exit(1)
 	}
 
@@ -182,7 +181,7 @@ func DeleteDomain(domain string) {
 		return
 	}
 
-	currHostsMap := parseHostFile(getHostPath())
+	currHostsMap := ParseHostFile(getHostPath())
 
 	if len(currHostsMap) == 0 || currHostsMap[domain] == nil {
 		return
@@ -193,7 +192,7 @@ func DeleteDomain(domain string) {
 }
 
 func ListCurrentHosts() {
-	currHostsMap := parseHostFile(getHostPath())
+	currHostsMap := ParseHostFile(getHostPath())
 	if len(currHostsMap) == 0 {
 		return
 	}
