@@ -94,7 +94,7 @@ func disableGroup(name string) {
 
 }
 
-func appendToFile(filePath string, stringToWrite string) {
+func (h *Hostfile) appendToFile(filePath string, stringToWrite string) {
 	fp, err := os.OpenFile(filePath, os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
 		fmt.Printf("failed opening file %s : %s\n", filePath, err)
@@ -151,7 +151,7 @@ func (h *Hostfile) AppendHost(domain string, ip string) {
 	}
 
 	hostname := NewHostname(domain, ip, true)
-	appendToFile(getHostPath(), hostname.toString())
+	h.appendToFile(getHostPath(), hostname.toString())
 }
 
 func (h *Hostfile) writeToFile(hostnameMap map[string]*Hostname, path string) {
