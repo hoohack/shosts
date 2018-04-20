@@ -1,7 +1,8 @@
-package shosts
+package main
 
 import (
 	"fmt"
+	"github.com/hoohack/shosts"
 	"os"
 )
 
@@ -27,7 +28,7 @@ func main() {
 	fmt.Println("command: " + command)
 	args := getArgs()
 	filePath := "/etc/hosts"
-	hostfile := NewHostfile(filePath)
+	hostfile := shosts.NewHostfile(filePath)
 	switch command {
 	case "append":
 		domain := args[1]
