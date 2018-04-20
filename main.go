@@ -1,8 +1,7 @@
-package main
+package shosts
 
 import (
 	"fmt"
-	"github.com/hoohack/go-hosts/hosts"
 	"os"
 )
 
@@ -27,18 +26,20 @@ func main() {
 
 	fmt.Println("command: " + command)
 	args := getArgs()
+	filePath := "/etc/hosts"
+	hostfile := NewHostfile(filePath)
 	switch command {
 	case "append":
 		domain := args[1]
 		ip := args[0]
-		hosts.AppendHost(domain, ip)
+		hostfile.AppendHost(domain, ip)
 		break
 	case "del":
 		domain := args[0]
-		hosts.DeleteDomain(domain)
+		hostfile.DeleteDomain(domain)
 		break
 	case "list":
-		hosts.ListCurrentHosts()
+		hostfile.ListCurrentHosts()
 		break
 	default:
 		fmt.Println("Please enter the right command[append|del|list]")

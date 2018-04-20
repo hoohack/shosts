@@ -1,4 +1,4 @@
-package hosts
+package shosts
 
 import (
 	"fmt"
@@ -110,7 +110,7 @@ func appendToFile(filePath string, stringToWrite string) {
 	}
 }
 
-func PathExists(path string) bool {
+func (h *Hostfile) PathExists(path string) bool {
 	_, err := os.Stat(path)
 	if err == nil || os.IsNotExist(err) {
 		return true
@@ -119,8 +119,8 @@ func PathExists(path string) bool {
 	return false
 }
 
-func ParseHostFile(path string) map[string]*Hostname {
-	if !PathExists(path) {
+func (h *Hostfile) ParseHostfile(path string) map[string]*Hostname {
+	if !h.PathExists(path) {
 		fmt.Printf("path %s is not exists", path)
 		os.Exit(1)
 	}
@@ -145,7 +145,7 @@ func ParseHostFile(path string) map[string]*Hostname {
 	return hostnameMap
 }
 
-func AppendHost(domain string, ip string) {
+func (h *Hostfile) AppendHost(domain string, ip string) {
 	if domain == "" || ip == "" {
 		return
 	}
@@ -154,8 +154,8 @@ func AppendHost(domain string, ip string) {
 	appendToFile(getHostPath(), hostname.toString())
 }
 
-func writeToFile(hostnameMap map[string]*Hostname, path string) {
-	if !PathExists(path) {
+func (h *Hostfile) writeToFile(hostnameMap map[string]*Hostname, path string) {
+	if !h.PathExists(path) {
 		fmt.Printf("path %s is not exists", path)
 		os.Exit(1)
 	}
@@ -176,23 +176,23 @@ func writeToFile(hostnameMap map[string]*Hostname, path string) {
 	}
 }
 
-func DeleteDomain(domain string) {
+func (h *Hostfile) DeleteDomain(domain string) {
 	if domain == "" {
 		return
 	}
 
-	currHostsMap := ParseHostFile(getHostPath())
+	currHostsMap := h.ParseHostfile(getHostPath())
 
 	if len(currHostsMap) == 0 || currHostsMap[domain] == nil {
 		return
 	}
 
 	delete(currHostsMap, domain)
-	writeToFile(currHostsMap, getHostPath())
+	h.writeToFile(currHostsMap, getHostPath())
 }
 
-func ListCurrentHosts() {
-	currHostsMap := ParseHostFile(getHostPath())
+func (h *Hostfile) ListCurrentHosts() {
+	currHostsMap := h.ParseHostfile(getHostPath())
 	if len(currHostsMap) == 0 {
 		return
 	}
