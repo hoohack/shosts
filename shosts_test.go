@@ -7,7 +7,7 @@ import (
 )
 
 func TestAppend(t *testing.T) {
-	filePath := "/home/hoohack/go/src/shosts/tests/hostfile"
+	filePath := "/home/hoohack/go/src/shosts/sources/hostfile"
 	hostfile := NewHostfile(filePath)
 	if !hostfile.PathExists(filePath) {
 		fmt.Printf("file : %s not exists\n", filePath)

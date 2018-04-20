@@ -1,6 +1,4 @@
 main:
-	go build main.go
-test:
-	go build test.go
+	go build cmd/main.go
 clean:
 	rm -rf main test
