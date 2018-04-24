@@ -7,7 +7,7 @@ import (
 )
 
 func TestAppend(t *testing.T) {
-	filePath := "/home/hoohack/go/src/shosts/sources/hostfile"
+	filePath := "/Users/hoohack/Projects/Go/src/shosts/sources/hostfile"
 	var _, err = os.Stat(filePath)
 	if os.IsExist(err) {
 		fmt.Printf("file %s already exists, remove first\n", filePath)

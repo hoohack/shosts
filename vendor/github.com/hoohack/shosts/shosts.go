@@ -74,8 +74,23 @@ func getHostPath() string {
 	return path
 }
 
-func addGroup(name string) {
+func (h *Hostfile) AddGroup(grpName string) {
+	curWd, _ := os.Getwd()
+	grpFilePath := curWd + "/sources/group/" + grpName
+	if !h.PathExists(grpFilePath) {
+		fmt.Printf("group %s's file not exists, please add group file first\n", grpFilePath)
+	} else {
+		fmt.Println("yes")
+	}
 
+	//if !h.grpFileValid(grpName) {
+	//fmt.Printf("group file %s's syntax is wrong, please reedit.[ip] [domain] per line\n", grpFilePath)
+	//}
+
+	//hostnameMap := h.ParseHostfile(grpFilePath)
+	//for domain, ip := range hostnameMap {
+	//h.AppendHost(domain, ip)
+	/*}*/
 }
 
 func deleteGroup(name string) {
@@ -112,7 +127,7 @@ func appendToFile(filePath string, stringToWrite string) {
 
 func (h *Hostfile) PathExists(path string) bool {
 	_, err := os.Stat(path)
-	if err == nil || os.IsNotExist(err) {
+	if err == nil || os.IsExist(err) {
 		return true
 	}
 

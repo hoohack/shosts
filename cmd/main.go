@@ -75,6 +75,9 @@ func main() {
 	case "list":
 		hostfile.ListCurrentHosts()
 		break
+	case "addGrp":
+		grpName := args[0]
+		hostfile.AddGroup(grpName)
 	default:
 		fmt.Println("Please enter the right command[append|del|list]")
 	}
