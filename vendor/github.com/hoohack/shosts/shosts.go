@@ -115,7 +115,7 @@ func disableGroup(name string) {
 
 }
 
-func appendToFile(filePath string, stringToWrite string) {
+func appendToFile(filePath string, hostname *Hostname) {
 	fp, err := os.OpenFile(filePath, os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
 		fmt.Printf("failed opening file %s : %s\n", filePath, err)
@@ -123,8 +123,7 @@ func appendToFile(filePath string, stringToWrite string) {
 	}
 	defer fp.Close()
 
-	stringToWrite = "\n" + stringToWrite + "\n"
-	_, err = fp.WriteString(stringToWrite)
+	_, err = fp.WriteString(hostname.toString())
 	if err != nil {
 		fmt.Printf("failed append string: %s: %s\n", filePath, err)
 		os.Exit(1)
@@ -144,6 +143,10 @@ func IsEmptyLine(str string) bool {
 	re := regexp.MustCompile(`^\s*$`)
 
 	return re.MatchString(str)
+}
+
+func TrimWS(str string) string {
+	return strings.Trim(str, " \n\t")
 }
 
 func (h *Hostfile) ParseHostfile(path string) map[string]*Hostname {
@@ -177,8 +180,9 @@ func (h *Hostfile) ParseHostfile(path string) map[string]*Hostname {
 			continue
 		}
 		tmpHostnameArr := strings.Split(str, " ")
-		domain := strings.Trim(tmpHostnameArr[1], " \n")
-		tmpHostname := NewHostname(curComment, domain, tmpHostnameArr[0], true)
+		curDomain := TrimWS(tmpHostnameArr[1])
+		curIP := TrimWS(tmpHostnameArr[0])
+		tmpHostname := NewHostname(curComment, curDomain, curIP, true)
 		hostnameMap[tmpHostname.Domain] = tmpHostname
 
 		curComment = ""
@@ -193,7 +197,7 @@ func (h *Hostfile) AppendHost(domain string, ip string) {
 	}
 
 	hostname := NewHostname("", domain, ip, true)
-	appendToFile(getHostPath(), hostname.toString())
+	appendToFile(getHostPath(), hostname)
 }
 
 func (h *Hostfile) writeToFile(hostnameMap map[string]*Hostname, path string) {
