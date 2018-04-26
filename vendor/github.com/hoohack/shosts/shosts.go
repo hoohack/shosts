@@ -1,9 +1,11 @@
 package shosts
 
 import (
+	"bufio"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
+	"regexp"
 	"strings"
 )
 
@@ -19,6 +21,7 @@ type Hostfile struct {
 * 单个host属性
  */
 type Hostname struct {
+	Comment string // 注释
 	Domain  string
 	IP      string
 	Enabled bool
@@ -40,12 +43,15 @@ func NewHostfile(path string) *Hostfile {
 	return &Hostfile{path, make(map[string]*Hostname)}
 }
 
-func NewHostname(domain string, ip string, enabled bool) *Hostname {
-	return &Hostname{domain, ip, enabled}
+func NewHostname(comment string, domain string, ip string, enabled bool) *Hostname {
+	return &Hostname{comment, domain, ip, enabled}
 }
 
 func (h *Hostname) toString() string {
-	return h.IP + " " + h.Domain
+	if len(h.Comment) > 0 {
+		h.Comment += "\n"
+	}
+	return h.Comment + h.IP + " " + h.Domain + "\n"
 }
 
 /*
@@ -117,7 +123,7 @@ func appendToFile(filePath string, stringToWrite string) {
 	}
 	defer fp.Close()
 
-	stringToWrite = "\n" + stringToWrite
+	stringToWrite = "\n" + stringToWrite + "\n"
 	_, err = fp.WriteString(stringToWrite)
 	if err != nil {
 		fmt.Printf("failed append string: %s: %s\n", filePath, err)
@@ -134,27 +140,48 @@ func (h *Hostfile) PathExists(path string) bool {
 	return false
 }
 
+func IsEmptyLine(str string) bool {
+	re := regexp.MustCompile(`^\s*$`)
+
+	return re.MatchString(str)
+}
+
 func (h *Hostfile) ParseHostfile(path string) map[string]*Hostname {
 	if !h.PathExists(path) {
 		fmt.Printf("path %s is not exists", path)
 		os.Exit(1)
 	}
 
-	fileContents, err := ioutil.ReadFile(path)
-	if err != nil {
-		fmt.Printf("read file %s fail: %s", path, err)
+	fp, fpErr := os.Open(path)
+	if fpErr != nil {
+		fmt.Printf("open file '%s' failed\n", path)
 		os.Exit(1)
 	}
+	defer fp.Close()
 
-	hostnameArr := strings.Split(string(fileContents[:]), "\n")
+	br := bufio.NewReader(fp)
 	hostnameMap := make(map[string]*Hostname)
-	for _, val := range hostnameArr {
-		if len(val) == 0 || val == "\r\n" {
+	curComment := ""
+	for {
+		str, rErr := br.ReadString('\n')
+		if rErr == io.EOF {
+			break
+		}
+		if 0 == len(str) || str == "\r\n" || IsEmptyLine(str) {
 			continue
 		}
-		tmpHostnameArr := strings.Split(val, " ")
-		tmpHostname := NewHostname(tmpHostnameArr[1], tmpHostnameArr[0], true)
+
+		if str[0] == '#' {
+			// 处理注释
+			curComment += str
+			continue
+		}
+		tmpHostnameArr := strings.Split(str, " ")
+		domain := strings.Trim(tmpHostnameArr[1], " \n")
+		tmpHostname := NewHostname(curComment, domain, tmpHostnameArr[0], true)
 		hostnameMap[tmpHostname.Domain] = tmpHostname
+
+		curComment = ""
 	}
 
 	return hostnameMap
@@ -165,7 +192,7 @@ func (h *Hostfile) AppendHost(domain string, ip string) {
 		return
 	}
 
-	hostname := NewHostname(domain, ip, true)
+	hostname := NewHostname("", domain, ip, true)
 	appendToFile(getHostPath(), hostname.toString())
 }
 
@@ -199,6 +226,7 @@ func (h *Hostfile) DeleteDomain(domain string) {
 	currHostsMap := h.ParseHostfile(getHostPath())
 
 	if len(currHostsMap) == 0 || currHostsMap[domain] == nil {
+		fmt.Printf("domain %s not exist\n", domain)
 		return
 	}
 
