@@ -2,8 +2,10 @@ package shosts
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
+	"net/url"
 	"os"
 	"regexp"
 	"strings"
@@ -88,7 +90,11 @@ func (h *Hostfile) AddGroup(grpName string) {
 		os.Exit(1)
 	}
 
-	grpHostnameMap := h.ParseHostfile(grpFilePath)
+	grpHostnameMap, parseErr := h.ParseHostfile(grpFilePath)
+	if parseErr != nil {
+		fmt.Println("parse file failed" + parseErr.Error())
+	}
+
 	if len(grpHostnameMap) == 0 {
 		fmt.Printf("group file %s is empty,please add host first\n", grpFilePath)
 		os.Exit(1)
@@ -149,7 +155,18 @@ func TrimWS(str string) string {
 	return strings.Trim(str, " \n\t")
 }
 
-func (h *Hostfile) ParseHostfile(path string) map[string]*Hostname {
+func CheckIP(ip string) bool {
+	re := regexp.MustCompile(`(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}`)
+
+	return re.MatchString(ip)
+}
+
+func CheckDomain(domain string) bool {
+	_, errURL := url.Parse(domain)
+	return errURL == nil
+}
+
+func (h *Hostfile) ParseHostfile(path string) (map[string]*Hostname, error) {
 	if !h.PathExists(path) {
 		fmt.Printf("path %s is not exists", path)
 		os.Exit(1)
@@ -181,14 +198,20 @@ func (h *Hostfile) ParseHostfile(path string) map[string]*Hostname {
 		}
 		tmpHostnameArr := strings.Split(str, " ")
 		curDomain := TrimWS(tmpHostnameArr[1])
+		if !CheckDomain(curDomain) {
+			return hostnameMap, errors.New("file syntax error")
+		}
 		curIP := TrimWS(tmpHostnameArr[0])
+		if !CheckIP(curIP) {
+			return hostnameMap, errors.New("file syntax error")
+		}
 		tmpHostname := NewHostname(curComment, curDomain, curIP, true)
 		hostnameMap[tmpHostname.Domain] = tmpHostname
 
 		curComment = ""
 	}
 
-	return hostnameMap
+	return hostnameMap, nil
 }
 
 func (h *Hostfile) AppendHost(domain string, ip string) {
@@ -227,7 +250,11 @@ func (h *Hostfile) DeleteDomain(domain string) {
 		return
 	}
 
-	currHostsMap := h.ParseHostfile(getHostPath())
+	currHostsMap, parseErr := h.ParseHostfile(getHostPath())
+	if parseErr != nil {
+		fmt.Println("parse file failed" + parseErr.Error())
+		return
+	}
 
 	if len(currHostsMap) == 0 || currHostsMap[domain] == nil {
 		fmt.Printf("domain %s not exist\n", domain)
@@ -239,7 +266,11 @@ func (h *Hostfile) DeleteDomain(domain string) {
 }
 
 func (h *Hostfile) ListCurrentHosts() {
-	currHostsMap := h.ParseHostfile(getHostPath())
+	currHostsMap, parseErr := h.ParseHostfile(getHostPath())
+	if parseErr != nil {
+		fmt.Println("parse file failed" + parseErr.Error())
+		return
+	}
 	if len(currHostsMap) == 0 {
 		return
 	}
