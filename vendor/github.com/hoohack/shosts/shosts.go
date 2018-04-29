@@ -113,14 +113,6 @@ func renameGroup(name string) {
 
 }
 
-func enableGroup(name string) {
-
-}
-
-func disableGroup(name string) {
-
-}
-
 func appendToFile(filePath string, hostname *Hostname) {
 	fp, err := os.OpenFile(filePath, os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
@@ -196,14 +188,14 @@ func (h *Hostfile) ParseHostfile(path string) (map[string]*Hostname, error) {
 			curComment += str
 			continue
 		}
-		tmpHostnameArr := strings.Split(str, " ")
+		tmpHostnameArr := strings.Fields(str)
 		curDomain := TrimWS(tmpHostnameArr[1])
 		if !CheckDomain(curDomain) {
-			return hostnameMap, errors.New("file syntax error")
+			return hostnameMap, errors.New(" file contain error domain" + curDomain)
 		}
 		curIP := TrimWS(tmpHostnameArr[0])
 		if !CheckIP(curIP) {
-			return hostnameMap, errors.New("file syntax error")
+			return hostnameMap, errors.New(" file contain error ip" + curIP)
 		}
 		tmpHostname := NewHostname(curComment, curDomain, curIP, true)
 		hostnameMap[tmpHostname.Domain] = tmpHostname
@@ -276,6 +268,6 @@ func (h *Hostfile) ListCurrentHosts() {
 	}
 
 	for _, mapVal := range currHostsMap {
-		fmt.Println(mapVal.toString())
+		fmt.Print(mapVal.toString())
 	}
 }
