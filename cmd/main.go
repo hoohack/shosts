@@ -33,6 +33,11 @@ func checkArgs(command string, args []string) {
 			os.Exit(1)
 		}
 		break
+	case "enableGrp":
+		if len(args) != 2 {
+			fmt.Printf("Please input the right args: 'enableGrp $groupName' eg: addGrp localhost\n")
+			os.Exit(1)
+		}
 	default:
 		break
 	}
@@ -64,10 +69,14 @@ func main() {
 	case "list":
 		hostfile.ListCurrentHosts()
 		break
-	case "addGrp":
+	case "enableGrp":
 		grpName := args[0]
 		hostfile.AddGroup(grpName)
+		break
+	case "listGrp":
+		hostfile.ListCurrentHostsGroup()
+		break
 	default:
-		fmt.Println("Please enter the right command[append|del|list]")
+		fmt.Println("Please enter the right command[append|del|list|listGrp|enableGrp]")
 	}
 }

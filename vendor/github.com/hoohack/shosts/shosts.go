@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net"
 	"net/url"
 	"os"
@@ -40,12 +41,15 @@ type HostGroup struct {
 }
 
 /*
-* 实例化
+* 实例化Hostfile
  */
 func NewHostfile(path string) *Hostfile {
 	return &Hostfile{path, make(map[string]*Hostname)}
 }
 
+/*
+* 实例化Hostname
+ */
 func NewHostname(comment string, domain string, ip string, enabled bool) *Hostname {
 	return &Hostname{comment, domain, ip, enabled}
 }
@@ -81,6 +85,23 @@ func getHostPath() string {
 	}
 
 	return path
+}
+
+func (h *Hostfile) ListCurrentHostsGroup() {
+	curWd, _ := os.Getwd()
+	grpFilePath := curWd + "/sources/group/"
+	files, err := ioutil.ReadDir(grpFilePath)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	if len(files) == 0 {
+		fmt.Println("no hosts group found")
+	}
+	fmt.Println("current hosts group is: ")
+	for _, f := range files {
+		fmt.Println(f.Name())
+	}
 }
 
 func (h *Hostfile) AddGroup(grpName string) {
