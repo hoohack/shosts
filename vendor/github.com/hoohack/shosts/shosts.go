@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/url"
 	"os"
 	"regexp"
@@ -147,10 +148,23 @@ func TrimWS(str string) string {
 	return strings.Trim(str, " \n\t")
 }
 
-func CheckIP(ip string) bool {
-	re := regexp.MustCompile(`(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}`)
+func CheckIP(ipStr string) error {
+	ip := net.ParseIP(ipStr)
 
-	return re.MatchString(ip)
+	if ip == nil {
+		host, _, err := net.SplitHostPort(ipStr)
+		if err != nil {
+			return err
+		}
+
+		ip = net.ParseIP(host)
+	}
+
+	if ip == nil {
+		return errors.New("invalid address format")
+	}
+
+	return nil
 }
 
 func CheckDomain(domain string) bool {
@@ -194,8 +208,9 @@ func (h *Hostfile) ParseHostfile(path string) (map[string]*Hostname, error) {
 			return hostnameMap, errors.New(" file contain error domain" + curDomain)
 		}
 		curIP := TrimWS(tmpHostnameArr[0])
-		if !CheckIP(curIP) {
-			return hostnameMap, errors.New(" file contain error ip" + curIP)
+		checkIPErr := CheckIP(curIP)
+		if checkIPErr != nil {
+			return hostnameMap, checkIPErr
 		}
 		tmpHostname := NewHostname(curComment, curDomain, curIP, true)
 		hostnameMap[tmpHostname.Domain] = tmpHostname

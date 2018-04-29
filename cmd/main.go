@@ -21,7 +21,8 @@ func getArgs() []string {
 func checkArgs(command string, args []string) {
 	switch command {
 	case "append":
-		if len(args) != 2 || !shosts.CheckIP(args[0]) || !shosts.CheckDomain(args[1]) {
+		checkIPErr := shosts.CheckIP(args[0])
+		if len(args) != 2 || checkIPErr != nil || !shosts.CheckDomain(args[1]) {
 			fmt.Printf("Please input the right args: 'append $ip $domain' eg: append 127.0.0.1 www.baidu.com\n")
 			os.Exit(1)
 		}
