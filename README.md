@@ -30,9 +30,16 @@ switch hosts in go
 	eg:
 	./main listGrp
 
-添加host分组列表中某一个分组到系统hosts中
+使用host分组列表中的某一个分组
 	
 	./main enableGrp [grpName]
 
 	eg:
 	./main enableGrp ubuntu
+
+取消使用host分组列表中的某一个分组
+	
+	./main disableGrp [grpName]
+
+	eg:
+	./main disableGrp ubuntu
