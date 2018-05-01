@@ -104,7 +104,7 @@ func (h *Hostfile) ListCurrentHostsGroup() {
 	}
 }
 
-func (h *Hostfile) AddGroup(grpName string) {
+func (h *Hostfile) EnableGroup(grpName string) {
 	curWd, _ := os.Getwd()
 	grpFilePath := curWd + "/sources/group/" + grpName
 	if !h.PathExists(grpFilePath) {
@@ -127,8 +127,27 @@ func (h *Hostfile) AddGroup(grpName string) {
 	}
 }
 
-func deleteGroup(name string) {
+func (h *Hostfile) DisableGroup(grpName string) {
+	curWd, _ := os.Getwd()
+	grpFilePath := curWd + "/sources/group/" + grpName
+	if !h.PathExists(grpFilePath) {
+		fmt.Printf("group %s's file: %s not exists, please add group file first\n", grpName, grpFilePath)
+		os.Exit(1)
+	}
 
+	grpHostnameMap, parseErr := h.ParseHostfile(grpFilePath)
+	if parseErr != nil {
+		fmt.Println("parse file failed" + parseErr.Error())
+	}
+
+	if len(grpHostnameMap) == 0 {
+		fmt.Printf("group file %s is empty,please add host first\n", grpFilePath)
+		os.Exit(1)
+	}
+
+	for domain, _ := range grpHostnameMap {
+		h.DeleteDomain(domain)
+	}
 }
 
 func renameGroup(name string) {
