@@ -150,10 +150,6 @@ func (h *Hostfile) DisableGroup(grpName string) {
 	}
 }
 
-func renameGroup(name string) {
-
-}
-
 func appendToFile(filePath string, hostname *Hostname) {
 	fp, err := os.OpenFile(filePath, os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {

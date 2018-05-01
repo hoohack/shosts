@@ -2,12 +2,14 @@ package shosts
 
 import (
 	"fmt"
+	"github.com/hoohack/shosts"
 	"os"
 	"testing"
 )
 
 func TestAppend(t *testing.T) {
-	filePath := "/Users/hoohack/Projects/Go/src/shosts/sources/hostfile"
+	curWd, _ := os.Getwd()
+	filePath := curWd + "/sources/hostfile"
 	var _, err = os.Stat(filePath)
 	if os.IsExist(err) {
 		fmt.Printf("file %s already exists, remove first\n", filePath)
@@ -28,13 +30,17 @@ func TestAppend(t *testing.T) {
 	defer file.Close()
 	fmt.Printf("==> done creating file: %s\n", filePath)
 
-	hostfile := NewHostfile(filePath)
+	hostfile := shosts.NewHostfile(filePath)
 	if !hostfile.PathExists(filePath) {
 		fmt.Printf("file : %s not exists\n", filePath)
 		os.Exit(1)
 	}
 
-	hostnameMap := hostfile.ParseHostfile(filePath)
+	hostnameMap, parseErr := hostfile.ParseHostfile(filePath)
+	if parseErr != nil {
+		fmt.Println(parseErr)
+		os.Exit(1)
+	}
 	if len(hostnameMap) != 0 {
 		fmt.Printf("file %s is not empty\n", filePath)
 		os.Exit(1)
@@ -46,7 +52,11 @@ func TestAppend(t *testing.T) {
 	os.Setenv("GOHOST_FILE", filePath)
 	hostfile.AppendHost(domain, ip)
 
-	newHostnameMap := hostfile.ParseHostfile(filePath)
+	newHostnameMap, parseErr := hostfile.ParseHostfile(filePath)
+	if parseErr != nil {
+		fmt.Println(parseErr)
+		os.Exit(1)
+	}
 	if len(newHostnameMap) == 0 {
 		fmt.Println("append test failed")
 		os.Exit(1)
@@ -71,7 +81,8 @@ func TestAppend(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
-	filePath := "/home/hoohack/go/src/shosts/sources/testdelete"
+	curWd, _ := os.Getwd()
+	filePath := curWd + "/sources/testdelete"
 	var _, err = os.Stat(filePath)
 	if os.IsNotExist(err) {
 		var file, err = os.Create(filePath)
@@ -85,13 +96,17 @@ func TestDelete(t *testing.T) {
 	}
 
 	fmt.Printf("==> done creating file: %s\n", filePath)
-	hostfile := NewHostfile(filePath)
+	hostfile := shosts.NewHostfile(filePath)
 	if !hostfile.PathExists(filePath) {
 		fmt.Printf("file : %s not exists please create first\n", filePath)
 		os.Exit(1)
 	}
 
-	hostnameMap := hostfile.ParseHostfile(filePath)
+	hostnameMap, parseErr := hostfile.ParseHostfile(filePath)
+	if parseErr != nil {
+		fmt.Println(parseErr)
+		os.Exit(1)
+	}
 	if len(hostnameMap) != 0 {
 		fmt.Printf("file %s is not empty\n", filePath)
 		os.Exit(1)
@@ -103,14 +118,22 @@ func TestDelete(t *testing.T) {
 	os.Setenv("GOHOST_FILE", filePath)
 	hostfile.AppendHost(domain, ip)
 
-	newHostnameMap := hostfile.ParseHostfile(filePath)
+	newHostnameMap, parseErr := hostfile.ParseHostfile(filePath)
+	if parseErr != nil {
+		fmt.Println(parseErr)
+		os.Exit(1)
+	}
 	if len(newHostnameMap) == 0 {
 		fmt.Println("append failed")
 		os.Exit(1)
 	}
 
 	hostfile.DeleteDomain("test.delete.com")
-	hostnameMapAfterDelete := hostfile.ParseHostfile(filePath)
+	hostnameMapAfterDelete, parseErr := hostfile.ParseHostfile(filePath)
+	if parseErr != nil {
+		fmt.Println(parseErr)
+		os.Exit(1)
+	}
 	if len(hostnameMapAfterDelete) == 0 {
 		fmt.Println("delete test success")
 	} else {
