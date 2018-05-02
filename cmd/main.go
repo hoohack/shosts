@@ -51,7 +51,7 @@ func checkArgs(command string, args []string) {
 func main() {
 	command := getCommand()
 	if command == "" {
-		fmt.Println("Please enter the right command[append|del|list]")
+		fmt.Println("Please enter the right command[append|del|list|listGrp|disableGrp|enableGrp]")
 		os.Exit(1)
 	}
 
