@@ -32,10 +32,10 @@ switch hosts in go
     make install
 
     eg:
-	append 127.0.1.1 ubuntu
+	shosts append 127.0.1.1 ubuntu
 
-	del ubuntu
+	shosts del ubuntu
 
-	enableGrp ubuntu
+	shosts enableGrp ubuntu
 
-	disableGrp ubuntu
+	shosts disableGrp ubuntu
